@@ -2,6 +2,8 @@ package chrome
 
 import (
 	"errors"
+	"fmt"
+	"github.com/4everland/screenshot/lib"
 	"net/url"
 	"sync"
 	"time"
@@ -37,13 +39,18 @@ func NewScheduler(maxThread int, chrome *Chrome) *Scheduler {
 func (s *Scheduler) Exec(ch chan<- []byte, o ScreenshotOptions) {
 	s.Threads <- true
 	if o.EndTime.Before(time.Now()) {
+		lib.Logger().Info(fmt.Sprintf("%s wait thread timeout, now: %d", o.URL.String(), time.Now().Unix()))
 		<-s.Threads
 		return
 	}
 
 	b := s.Chrome.Screenshot(o)
 	if o.EndTime.After(time.Now()) {
+		lib.Logger().Info(fmt.Sprintf("%s screenshot success, now: %d", o.URL.String(), time.Now().Unix()))
 		ch <- b
+	} else {
+		lib.Logger().Info(fmt.Sprintf("%s screenshot success but thread timeout, now: %d",
+			o.URL.String(), time.Now().Unix()))
 	}
 
 	close(ch)
@@ -53,12 +60,16 @@ func (s *Scheduler) Exec(ch chan<- []byte, o ScreenshotOptions) {
 
 func Screenshot(o ScreenshotOptions) (b []byte, err error) {
 	ch := make(chan []byte)
+	lib.Logger().Info(fmt.Sprintf("%s request %d end %d", o.URL.String(), o.ReqTime.Unix(), o.ReqTime.Unix()))
 	go scheduler.Exec(ch, o)
 
 	select {
 	case b := <-ch:
 		return b, nil
 	case <-time.After(o.EndTime.Sub(time.Now())):
+		lib.Logger().Info(fmt.Sprintf("%s channel select timeout endtime:%d now:%d",
+			o.URL.String(), o.EndTime.Unix(), time.Now().Unix()))
+
 		return b, errors.New("time out")
 	}
 

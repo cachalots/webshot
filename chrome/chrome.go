@@ -2,6 +2,7 @@ package chrome
 
 import (
 	"context"
+	"fmt"
 	"github.com/4everland/screenshot/lib"
 	"github.com/chromedp/chromedp"
 	"time"
@@ -29,6 +30,9 @@ func NewLocalChrome(execPath, proxy string) *Chrome {
 }
 
 func (c Chrome) Screenshot(o ScreenshotOptions) (b []byte) {
+	lib.Logger().Info(fmt.Sprintf("%s start screenshot, available sceond: %f",
+		o.URL.String(), o.EndTime.Sub(time.Now()).Seconds()))
+
 	timeoutCtx, cancel := context.WithTimeout(c.Ctx, o.EndTime.Sub(time.Now()))
 	defer cancel()
 
@@ -48,7 +52,10 @@ func (c Chrome) Screenshot(o ScreenshotOptions) (b []byte) {
 		}),
 	}); err != nil {
 		lib.Logger().Error("chrome screenshot err:"+err.Error(), lib.ChromeLog)
+		return
 	}
+
+	lib.Logger().Info(fmt.Sprintf("%s screenshot success %d", o.URL.String(), time.Now().Unix()))
 
 	return b
 }

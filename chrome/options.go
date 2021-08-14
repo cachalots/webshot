@@ -20,6 +20,7 @@ type ScreenshotOptions struct {
 	Width   int64
 	Height  int64
 	Delay   time.Duration
+	ReqTime time.Time
 	EndTime time.Time
 	Full    bool
 }

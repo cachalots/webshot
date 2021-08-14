@@ -40,17 +40,19 @@ func Screenshot(ctx *gin.Context) {
 		return
 	}
 
+	reqTime := time.Now()
 	b, err := chrome.Screenshot(chrome.ScreenshotOptions{
 		URL:     u,
 		Width:   req.Width,
 		Height:  req.Height,
 		Delay:   time.Duration(req.Delay) * time.Millisecond,
-		EndTime: time.Now().Add(time.Duration(req.Timeout) * time.Second),
+		ReqTime: reqTime,
+		EndTime: reqTime.Add(time.Duration(req.Timeout) * time.Second),
 		Full:    req.Full,
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{"message": err.Error()})
 		return
 	}
 
