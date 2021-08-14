@@ -43,7 +43,10 @@ func (c Chrome) Screenshot(o ScreenshotOptions) (b []byte) {
 		chromedp.EmulateViewport(o.Width, o.Height),
 		chromedp.Navigate(o.URL.String()),
 		chromedp.Sleep(o.Delay * time.Millisecond),
+		chromedp.WaitVisible("body", chromedp.ByQuery),
 		chromedp.ActionFunc(func(ctx context.Context) error {
+			lib.Logger().Info(fmt.Sprintf("%s screenshoting, available sceond: %d",
+				o.URL.String(), time.Now().Unix()))
 			if o.Full {
 				return chromedp.FullScreenshot(&b, 100).Do(ctx)
 			}

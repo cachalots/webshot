@@ -48,9 +48,6 @@ func (s *Scheduler) Exec(ch chan<- []byte, o ScreenshotOptions) {
 	if o.EndTime.After(time.Now()) {
 		lib.Logger().Info(fmt.Sprintf("%s screenshot success, now: %d", o.URL.String(), time.Now().Unix()))
 		ch <- b
-	} else {
-		lib.Logger().Info(fmt.Sprintf("%s screenshot success but thread timeout, now: %d",
-			o.URL.String(), time.Now().Unix()))
 	}
 
 	close(ch)
@@ -60,7 +57,7 @@ func (s *Scheduler) Exec(ch chan<- []byte, o ScreenshotOptions) {
 
 func Screenshot(o ScreenshotOptions) (b []byte, err error) {
 	ch := make(chan []byte)
-	lib.Logger().Info(fmt.Sprintf("%s request %d end %d", o.URL.String(), o.ReqTime.Unix(), o.ReqTime.Unix()))
+	lib.Logger().Info(fmt.Sprintf("%s request %d end %d", o.URL.String(), o.ReqTime.Unix(), o.EndTime.Unix()))
 	go scheduler.Exec(ch, o)
 
 	select {
